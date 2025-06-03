@@ -72,6 +72,47 @@ Provide:
 5. Number of participants.
 6. Any follow-up questions or topics that need further discussion.
 Please ensure the response is concise and structured.
+
+Example response format:
+Generating insights from Gemini...
+
+✅ Gemini Output:
+
+**1. Summary:** The meeting discussed YouTube's content recommendation algorithm.  The speaker argues that the algorithm reflects current global trends and individual user interests, aiming for diversity while prioritizing relevance.  A disagreement exists regarding the algorithm's transparency and control over content selection.
+
+**2. Action Items:** None explicitly stated in the transcript.
+
+**3. Sentiment:**  The overall sentiment is a mix of explanatory and slightly defensive regarding the YouTube algorithm.  There's an underlying tension between the algorithm's design goals and concerns about content control and transparency.
+
+**4. Key Insights/Decisions:** No concrete decisions were made. The key insight is the speaker's perspective on the algorithm's design philosophy: prioritizing relevance and reflecting real-world trends over strict content selection.
+
+**5. Number of Participants:**  The transcript indicates at least two participants,  one speaking and at least one listening ("you can choose an additive...").  The exact number is unknown.
+
+
+**6. Follow-up Questions/Topics:**
+* Clarification on the "additive" mentioned. What is it, and how does it relate to content creators seeing what should be shown?
+* Deeper discussion on balancing diversity and relevance in the algorithm.
+* Addressing concerns about the algorithm's lack of transparency and control for content creators.
+* Exploring methods to improve the algorithm's responsiveness to user feedback.
+
+
+Processed audio and generated insights.
+**1. Summary:** The meeting discussed YouTube's content recommendation algorithm.  The speaker argues that the algorithm reflects current global trends and individual user interests, aiming for diversity while prioritizing relevance.  A disagreement exists regarding the algorithm's transparency and control over content selection.
+
+**2. Action Items:** None explicitly stated in the transcript.
+
+**3. Sentiment:**  The overall sentiment is a mix of explanatory and slightly defensive regarding the YouTube algorithm.  There's an underlying tension between the algorithm's design goals and concerns about content control and transparency.
+
+**4. Key Insights/Decisions:** No concrete decisions were made. The key insight is the speaker's perspective on the algorithm's design philosophy: prioritizing relevance and reflecting real-world trends over strict content selection.
+
+**5. Number of Participants:**  The transcript indicates at least two participants,  one speaking and at least one listening ("you can choose an additive...").  The exact number is unknown.
+
+**6. Follow-up Questions/Topics:**
+* Clarification on the "additive" mentioned. What is it, and how does it relate to content creators seeing what should be shown?
+* Deeper discussion on balancing diversity and relevance in the algorithm.
+* Addressing concerns about the algorithm's lack of transparency and control for content creators.
+* Exploring methods to improve the algorithm's responsiveness to user feedback.
+
 """
     try:
         response = gemini_model.generate_content(prompt)
