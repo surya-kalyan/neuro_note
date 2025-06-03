@@ -1,90 +1,245 @@
+/* General Resets and Base Styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  background-color: #f4f7f6; /* Lighter, cleaner background */
+  color: #333;
   padding: 20px;
-  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .container {
-  max-width: 900px;
-  margin: auto;
-  background: #fff;
-  padding: 25px;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px; /* Slightly reduced max-width for better readability */
+  background: #ffffff;
+  padding: 30px; /* Increased padding */
+  border-radius: 12px; /* Softer border radius */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Softer shadow */
+  margin-bottom: 30px; /* Space at the bottom */
 }
 
+/* Typography */
 h1 {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
+  color: #2c3e50; /* Darker, more professional blue */
+  font-size: 2.2em; /* Responsive font size */
 }
 
-.controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.controls button {
-  padding: 10px 20px;
-  font-size: 16px;
-  border: none;
-  background-color: #2e8b57;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.controls button:disabled {
-  background-color: #ccc;
-}
-
-.progress {
+h2 {
+  margin-top: 30px;
   margin-bottom: 20px;
+  color: #34495e; /* Slightly lighter blue for section headers */
+  font-size: 1.8em;
+  border-bottom: 2px solid #eaecee; /* Subtle separator */
+  padding-bottom: 10px;
 }
 
-progress {
-  width: 100%;
-  height: 20px;
-}
-
-.result-card {
-  background: #f1f5f9;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 8px;
-}
-
-.result-card h3 {
+h3 {
   margin-top: 0;
-  font-size: 18px;
+  margin-bottom: 10px; /* Reduced margin for card headers */
+  font-size: 1.3em; /* Adjusted size */
+  color: #2980b9; /* Clear blue for card titles */
 }
 
-.sentiment-badge {
-  padding: 5px 10px;
-  border-radius: 12px;
-  color: #fff;
-  font-weight: bold;
-  display: inline-block;
-  margin-bottom: 5px;
-}
-
-.sentiment-concerned {
-  background-color: #e67e22;
-}
-
-.sentiment-cautious {
-  background-color: #f39c12;
-}
-
-.sentiment-neutral {
-  background-color: #bdc3c7;
+p, li {
+  margin-bottom: 10px;
+  color: #555; /* Softer text color */
 }
 
 ul {
   padding-left: 20px;
+  list-style-type: disc; /* Standard disc */
 }
 
-li {
-  margin-bottom: 5px;
+/* Controls Section */
+.controls {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  justify-content: space-around; /* Better spacing */
+  align-items: center;
+  margin-bottom: 25px;
+  gap: 15px; /* Gap between control items */
 }
+
+.controls button {
+  padding: 12px 25px; /* Larger buttons */
+  font-size: 1em; /* Relative font size */
+  border: none;
+  background-color: #3498db; /* Primary button color - blue */
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.controls button:hover:not(:disabled) {
+  background-color: #2980b9; /* Darker shade on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.controls button:disabled {
+  background-color: #bdc3c7; /* Muted disabled state */
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+#recordingTimer {
+  font-size: 1.1em;
+  color: #34495e;
+  font-weight: bold;
+  padding: 10px;
+  background-color: #ecf0f1;
+  border-radius: 6px;
+}
+
+/* Progress Section */
+.progress {
+  margin-bottom: 30px;
+  text-align: center; /* Center progress text */
+}
+
+#progressBar {
+  width: 100%;
+  height: 25px; /* Taller progress bar */
+  border-radius: 6px; /* Rounded corners for progress bar */
+  margin-bottom: 8px;
+  /* Custom progress bar appearance */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+#progressBar::-webkit-progress-bar {
+  background-color: #ecf0f1; /* Light grey track */
+  border-radius: 6px;
+}
+
+#progressBar::-webkit-progress-value {
+  background-color: #3498db; /* Blue progress */
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+#progressBar::-moz-progress-bar { /* Firefox */
+  background-color: #3498db;
+  border-radius: 6px;
+  transition: width 0.3s ease;
+}
+
+#progressText {
+  font-size: 0.95em;
+  color: #7f8c8d; /* Softer color for progress text */
+}
+
+/* Results Section */
+#resultsSection {
+  margin-top: 20px;
+}
+
+.result-card {
+  background: #fdfdfe; /* Slightly off-white cards */
+  padding: 20px; /* More padding in cards */
+  margin-bottom: 20px; /* Increased margin between cards */
+  border-radius: 8px;
+  border: 1px solid #eaecee; /* Subtle border for cards */
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05); /* Subtle shadow for cards */
+}
+
+.result-card p, .result-card li {
+  font-size: 0.95em; /* Slightly smaller text in cards for density */
+}
+
+/* Sentiment Badges */
+.sentiment-badge {
+  padding: 6px 12px; /* Adjusted padding */
+  border-radius: 16px; /* More pill-like shape */
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.9em; /* Slightly smaller badge text */
+  display: inline-block;
+  margin-bottom: 8px;
+  text-transform: uppercase; /* Uppercase for emphasis */
+  letter-spacing: 0.5px;
+}
+
+.sentiment-positive { background-color: #2ecc71; } /* Green for positive */
+.sentiment-negative { background-color: #e74c3c; } /* Red for negative */
+.sentiment-neutral { background-color: #95a5a6; } /* Grey for neutral */
+.sentiment-concerned { background-color: #e67e22; } /* Orange for concerned */
+.sentiment-cautious { background-color: #f39c12; } /* Yellow-orange for cautious */
+.sentiment-mixed { background-color: #8e44ad; } /* Purple for mixed */
+
+
+/* Error Message Styling */
+.error-message {
+  background-color: #e74c3c; /* Red background */
+  color: white;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  text-align: center;
+  display: none; /* Hidden by default */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    padding: 20px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  h2 {
+    font-size: 1.5em;
+  }
+  .controls {
+    flex-direction: column; /* Stack controls vertically */
+  }
+  .controls button {
+    width: 100%; /* Full width buttons on small screens */
+    margin-bottom: 10px;
+  }
+  #recordingTimer {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 10px;
+  }
+  .container {
+    padding: 15px;
+  }
+  h1 {
+    font-size: 1.6em;
+  }
+  h3 {
+    font-size: 1.1em;
+  }
+  .result-card {
+    padding: 15px;
+  }
+}
+
+/* Footer (Optional - if you add one) */
+/*
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  padding: 15px;
+  font-size: 0.9em;
+  color: #7f8c8d;
+}
+*/
