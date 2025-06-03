@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroNote</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>NeuroNote</h1>
+    <div class="controls">
+      <button id="startBtn">Start Recording</button>
+      <button id="stopBtn" disabled>Stop & Analyze</button>
+      <span id="recordingTimer">00:00</span>
+    </div>
+    <div class="progress">
+      <progress id="progressBar" value="0" max="100"></progress>
+      <span id="progressText">Ready to record...</span>
+    </div>
+
+    <section id="resultsSection" style="display:none">
+      <h2>Meeting Insights</h2>
+      <div class="result-card">
+        <h3>Summary</h3>
+        <p id="summaryContent"></p>
+      </div>
+      <div class="result-card">
+        <h3>Action Items</h3>
+        <ul id="actionItemsList"></ul>
+      </div>
+      <div class="result-card">
+        <h3>Sentiment</h3>
+        <span id="sentimentBadge" class="sentiment-badge">N/A</span>
+        <p id="sentimentDetails"></p>
+      </div>
+      <div class="result-card">
+        <h3>Key Insights</h3>
+        <p id="insightsContent"></p>
+      </div>
+      <div class="result-card">
+        <h3>Follow-Up</h3>
+        <p id="followupContent"></p>
+      </div>
+      <div class="result-card">
+        <h3>Meeting Stats</h3>
+        <p>Participants: <span id="participantCount">-</span></p>
+        <p>Duration: <span id="durationStat">-</span></p>
+        <p>Action Items: <span id="actionItemsCount">-</span></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let mediaRecorder;
+    let chunks = [];
+    let recordingStartTime;
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const recordingTimer = document.getElementById("recordingTimer");
+
+    startBtn.onclick = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      chunks = [];
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/wav' });
+        await processRecording(audioBlob);
+      };
+      mediaRecorder.start();
+      recordingStartTime = Date.now();
+      updateTimer();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+    };
+
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+    };
+
+    function updateTimer() {
+      const interval = setInterval(() => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+          const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+          const seconds = String(elapsed % 60).padStart(2, "0");
+          recordingTimer.textContent = `${minutes}:${seconds}`;
+        } else {
+          clearInterval(interval);
+        }
+      }, 500);
+    }
+
+    function updateProgress(value, text) {
+      document.getElementById("progressBar").value = value;
+      document.getElementById("progressText").textContent = text;
+    }
+
+    async function processRecording(audioBlob) {
+      const formData = new FormData();
+      formData.append("file", audioBlob, "meeting.wav");
+
+      updateProgress(25, "Uploading audio...");
+      const response = await fetch("http://localhost:5000/recorded-audio", {
+        method: "POST",
+        body: formData
+      });
+
+      console.log(response);
+
+      updateProgress(50, "Waiting for AI insights...");
+      const data = await response.json()
+
+      updateProgress(100, "Insights ready!");
+      displayRealResults(data['text']);
+    }
+
+    function displayRealResults(text) {
+        const results = parseInsights(text);
+
+        document.getElementById('resultsSection').style.display = 'block';
+
+        document.getElementById('summaryContent').textContent = results.summary;
+        document.getElementById('actionItemsList').innerHTML =
+            results.actionItems.length > 0
+            ? results.actionItems.map(item => `<li>${item}</li>`).join('')
+            : '<li>None</li>';
+
+        document.getElementById('sentimentBadge').textContent = results.sentiment;
+        document.getElementById('sentimentBadge').className = `sentiment-badge sentiment-${results.sentiment.toLowerCase()}`;
+        document.getElementById('sentimentDetails').textContent = results.sentimentDetail;
+
+        document.getElementById('insightsContent').textContent = results.keyInsights;
+        document.getElementById('followupContent').innerHTML = results.followUps.map(q => `<li>${q}</li>`).join('');
+
+        document.getElementById('participantCount').textContent = results.participants;
+        document.getElementById('actionItemsCount').textContent = results.actionItems.length;
+        document.getElementById('durationStat').textContent = recordingTimer.textContent;
+
+        document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+    function parseInsights(text) {
+        const result = {
+            summary: '',
+            actionItems: [],
+            sentiment: 'N/A',
+            sentimentDetail: '',
+            keyInsights: '',
+            followUps: [],
+            participants: '-'
+        };
+
+        result.summary = (text.match(/\*\*1\. Summary:\*\*([\s\S]*?)\*\*2\./) || [,''])[1].trim();
+        result.actionItems = ((text.match(/\*\*2\. Action Items:\*\*([\s\S]*?)\*\*3\./) || [,''])[1].match(/[*\-]\s(.+)/g) || [])
+            .map(item => item.replace(/^[*\-]\s/, '').trim());
+        const sentimentMatch = text.match(/\*\*3\. Sentiment:\*\*\s*([\s\S]*?)\*\*4\./);
+        result.sentimentDetail = sentimentMatch ? sentimentMatch[1].trim() : '';
+        if (result.sentimentDetail.toLowerCase().includes('concerned')) result.sentiment = 'Concerned';
+        if (result.sentimentDetail.toLowerCase().includes('cautious')) result.sentiment = 'Cautious';
+
+        result.keyInsights = (text.match(/\*\*4\. Key Insights\/Decisions:\*\*([\s\S]*?)\*\*5\./) || [,''])[1].trim();
+        result.participants = (text.match(/\*\*5\. Number of Participants:\*\*([\s\S]*?)\*\*6\./) || [,''])[1].trim();
+        result.followUps = ((text.match(/\*\*6\. Follow-up Questions\/Topics:\*\*([\s\S]*)/) || [,''])[1].match(/[*\-]\s(.+)/g) || [])
+            .map(item => item.replace(/^[*\-]\s/, '').trim());
+
+        return result;
+    }
+
+  </script>
+</body>
+</html>
