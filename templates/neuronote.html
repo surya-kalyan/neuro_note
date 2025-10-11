@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroNote AI - Intelligent Meeting Analytics</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Background Animation */
+    .background-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.1;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid-move 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes grid-move {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .floating-orbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent);
+      animation: float 15s infinite ease-in-out;
+    }
+
+    .orb:nth-child(1) { width: 200px; height: 200px; top: 10%; left: 10%; animation-delay: 0s; }
+    .orb:nth-child(2) { width: 150px; height: 150px; top: 60%; right: 10%; animation-delay: 5s; }
+    .orb:nth-child(3) { width: 100px; height: 100px; bottom: 20%; left: 20%; animation-delay: 10s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 80px 0 60px;
+      background: linear-gradient(135deg, transparent, rgba(0, 255, 255, 0.05));
+      border-radius: 20px;
+      margin: 40px 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+      animation: shimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #00ffff, #0080ff);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3); }
+      to { box-shadow: 0 10px 40px rgba(0, 255, 255, 0.6); }
+    }
+
+    .header h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header .tagline {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .header .subtitle {
+      font-size: 1rem;
+      color: rgba(0, 255, 255, 0.8);
+      font-weight: 500;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Control Panel */
+    .control-panel {
+      background: rgba(15, 15, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 40px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .control-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #00ffff, transparent);
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 16px 32px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      min-width: 180px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: inherit;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #00ffff, #0080ff);
+      color: #000;
+      box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 255, 255, 0.5);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #ff0080, #ff0040);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(255, 0, 128, 0.3);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(255, 0, 128, 0.5);
+    }
+
+    .btn:disabled {
+      background: rgba(100, 100, 100, 0.3);
+      color: rgba(255, 255, 255, 0.3);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn:disabled::before {
+      display: none;
+    }
+
+    .timer {
+      background: rgba(0, 255, 255, 0.1);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      padding: 20px 30px;
+      border-radius: 15px;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #00ffff;
+      min-width: 120px;
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+
+    /* Progress Section */
+    .progress-section {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-container {
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 50px;
+      height: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00ffff, #0080ff);
+      border-radius: 50px;
+      width: var(--progress, 0%);
+      transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: progress-shine 2s ease-in-out infinite;
+    }
+
+    @keyframes progress-shine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+    }
+
+    /* Results Section */
+    #resultsSection {
+      animation: slideInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .results-header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .results-header h2 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff, #00ffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 15px;
+    }
+
+    .results-header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.1rem;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .result-card {
+      background: rgba(15, 15, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00ffff, #0080ff);
+    }
+
+    .result-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(0, 255, 255, 0.4);
+      box-shadow: 0 20px 60px rgba(0, 255, 255, 0.1);
+    }
+
+    .result-card h3 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #00ffff, #0080ff);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .result-card p {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.8;
+      margin-bottom: 15px;
+      font-size: 1rem;
+    }
+
+    .result-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .result-card li {
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.1);
+      padding: 15px 20px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      color: rgba(255, 255, 255, 0.9);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #00ffff, #0080ff);
+    }
+
+    .result-card li:hover {
+      background: rgba(0, 255, 255, 0.1);
+      border-color: rgba(0, 255, 255, 0.3);
+      transform: translateX(8px);
+    }
+
+    .sentiment-badge {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sentiment-concerned {
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      color: #000;
+      box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+    }
+
+    .sentiment-cautious {
+      background: linear-gradient(135deg, #ff0080, #ff0040);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(255, 0, 128, 0.3);
+    }
+
+    .sentiment-positive {
+      background: linear-gradient(135deg, #00ff88, #00cc6a);
+      color: #000;
+      box-shadow: 0 8px 32px rgba(0, 255, 136, 0.3);
+    }
+
+    .sentiment-neutral {
+      background: linear-gradient(135deg, #888888, #666666);
+      color: #fff;
+      box-shadow: 0 8px 32px rgba(136, 136, 136, 0.3);
+    }
+
+    /* Loading Animation */
+    .loading-animation {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: #00ffff;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Recording Pulse Effect */
+    .recording-pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { 
+        box-shadow: 0 0 0 0 rgba(255, 0, 128, 0.7);
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      70% { 
+        box-shadow: 0 0 0 15px rgba(255, 0, 128, 0);
+      }
+      100% { 
+        box-shadow: 0 0 0 0 rgba(255, 0, 128, 0);
+        transform: scale(1);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 2.5rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .timer {
+        order: -1;
+        font-size: 1.5rem;
+      }
+      
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .btn {
+        min-width: 200px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 15px;
+      }
+      
+      .control-panel {
+        padding: 25px;
+      }
+      
+      .progress-section {
+        padding: 20px;
+      }
+      
+      .result-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+  <div class="floating-orbs">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">🧠</div>
+      </div>
+      <h1>NeuroNote AI</h1>
+      <p class="tagline">Advanced Meeting Intelligence Platform</p>
+      <p class="subtitle">Powered by Neural Language Processing</p>
+    </div>
+    
+    <div class="control-panel">
+      <div class="controls">
+        <button id="startBtn" class="btn btn-primary">
+          🎤 Initialize Recording
+        </button>
+        <div id="recordingTimer" class="timer">00:00</div>
+        <button id="stopBtn" class="btn btn-secondary" disabled>
+          ⏹️ Process & Analyze
+        </button>
+      </div>
+
+      <div class="progress-section">
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">AI System Ready • Awaiting Audio Input</div>
+      </div>
+    </div>
+
+    <section id="resultsSection" style="display:none">
+      <div class="results-header">
+        <h2>AI Analysis Complete</h2>
+        <p>Deep learning insights extracted from your meeting</p>
+      </div>
+      
+      <div class="results-grid">
+        <div class="result-card">
+          <h3><span class="card-icon">📋</span>Executive Summary</h3>
+          <p id="summaryContent"></p>
+        </div>
+        
+        <div class="result-card">
+          <h3><span class="card-icon">✓</span>Action Items</h3>
+          <ul id="actionItemsList"></ul>
+        </div>
+        
+        <div class="result-card">
+          <h3><span class="card-icon">🎯</span>Sentiment Analysis</h3>
+          <span id="sentimentBadge" class="sentiment-badge">Processing</span>
+          <p id="sentimentDetails"></p>
+        </div>
+        
+        <div class="result-card">
+          <h3><span class="card-icon">💡</span>Key Insights</h3>
+          <ul id="insightsContent"></ul>
+        </div>
+        
+        <div class="result-card">
+          <h3><span class="card-icon">🔄</span>Follow-Up Actions</h3>
+          <ul id="followupContent"></ul>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let mediaRecorder;
+    let chunks = [];
+    let recordingStartTime;
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+    const recordingTimer = document.getElementById("recordingTimer");
+
+    startBtn.onclick = async () => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      chunks = [];
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(chunks, { type: 'audio/wav' });
+        await processRecording(audioBlob);
+      };
+      mediaRecorder.start();
+      recordingStartTime = Date.now();
+      updateTimer();
+      startBtn.disabled = true;
+      stopBtn.disabled = false;
+      startBtn.innerHTML = '🎤 Recording Active';
+      stopBtn.classList.add('recording-pulse');
+      document.getElementById('progressText').textContent = 'Neural processing active • Recording in progress';
+    };
+
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
+      startBtn.disabled = false;
+      stopBtn.disabled = true;
+      startBtn.innerHTML = '🎤 Initialize Recording';
+      stopBtn.classList.remove('recording-pulse');
+    };
+
+    function updateTimer() {
+      const interval = setInterval(() => {
+        if (mediaRecorder && mediaRecorder.state === "recording") {
+          const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+          const minutes = String(Math.floor(elapsed / 60)).padStart(2, "0");
+          const seconds = String(elapsed % 60).padStart(2, "0");
+          recordingTimer.textContent = `${minutes}:${seconds}`;
+        } else {
+          clearInterval(interval);
+        }
+      }, 500);
+    }
+
+    function updateProgress(value, text) {
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      progressBar.style.setProperty('--progress', value + '%');
+      progressText.innerHTML = text + (value < 100 ? ' <span class="loading-animation"></span>' : '');
+    }
+
+    async function processRecording(audioBlob) {
+      const formData = new FormData();
+      formData.append("file", audioBlob, "meeting.wav");
+
+      updateProgress(25, "Uploading to Neuronote AI • Preparing for analysis");
+      const response = await fetch("/recorded-audio", {
+        method: "POST",
+        body: formData
+      });
+
+      console.log(response);
+
+      updateProgress(50, "AI processing • Extracting insights");
+      const data = await response.json();
+if (data.status === 'success') {
+  updateProgress(100, "✨ Neural analysis complete");
+  setTimeout(() => displayRealResults(data['text']), 500);
+} else {
+  updateProgress(100, "❌ Error processing audio");
+  alert("Error: " + (data.message || "Unknown error occurred"));
+}
+
+    }
+
+    function displayRealResults(text) {
+        const results = parseInsights(text);
+
+        document.getElementById('resultsSection').style.display = 'block';
+
+        document.getElementById('summaryContent').textContent = results.summary;
+        
+        const actionItemsList = document.getElementById('actionItemsList');
+        actionItemsList.innerHTML = results.actionItems.length > 0
+            ? results.actionItems.map(item => `<li>${item}</li>`).join('')
+            : '<li>No actionable items identified by AI analysis</li>';
+
+        const sentimentBadge = document.getElementById('sentimentBadge');
+        sentimentBadge.textContent = results.sentiment;
+        sentimentBadge.className = `sentiment-badge sentiment-${results.sentiment.toLowerCase()}`;
+        document.getElementById('sentimentDetails').textContent = results.sentimentDetail;
+
+        const insightsList = document.getElementById('insightsContent');
+        insightsList.innerHTML = results.keyInsights.length > 0
+            ? results.keyInsights.map(insight => `<li>${insight}</li>`).join('')
+             : '<li>No key insights detected</li>';
+
+        
+        const followupContent = document.getElementById('followupContent');
+        followupContent.innerHTML = results.followUps.length > 0
+            ? results.followUps.map(q => `<li>${q}</li>`).join('')
+            : '<li>No additional follow-up items detected</li>';
+
+        setTimeout(() => {
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }, 800);
+    }
+
+    function parseInsights(text) {
+    const result = {
+        summary: '',
+        actionItems: [],
+        sentiment: 'Neutral',
+        sentimentDetail: '',
+        keyInsights: '',
+        followUps: []
+    };
+
+    const sections = {
+        summary: /\*\*1\. Summary:\*\*([\s\S]*?)\*\*2\./,
+        actionItems: /\*\*2\. Action Items:\*\*([\s\S]*?)\*\*3\./,
+        sentiment: /\*\*3\. Sentiment:\*\*([\s\S]*?)\*\*4\./,
+        insights: /\*\*4\. Key Insights(?:\/Decisions)?:\*\*([\s\S]*?)\*\*5\./,
+        followUps: /\*\*6\. Follow-up Questions:?\*\*([\s\S]*)/
+ // Last one, open-ended
+    };
+
+    result.summary = (text.match(sections.summary) || [,''])[1].trim();
+    const actionsRaw = (text.match(sections.actionItems) || [,''])[1];
+    result.actionItems = actionsRaw ? actionsRaw.match(/[*\-]\s(.+)/g)?.map(x => x.replace(/^[-*]\s/, '').trim()) || [] : [];
+
+    const sentimentRaw = (text.match(sections.sentiment) || [,''])[1].trim();
+    result.sentimentDetail = sentimentRaw;
+    if (/positive/i.test(sentimentRaw)) result.sentiment = 'Positive';
+    else if (/concerned/i.test(sentimentRaw)) result.sentiment = 'Concerned';
+    else if (/cautious/i.test(sentimentRaw)) result.sentiment = 'Cautious';
+
+    const insightsRaw = (text.match(sections.insights) || [,''])[1];
+    result.keyInsights = insightsRaw
+        ? insightsRaw.match(/[*\-]\s(.+?)(?=(?:[*\-]\s)|$)/gs)?.map(x => x.replace(/^[-*]\s*/, '').trim()) || []
+        : [];
+
+
+    const followUpRaw = (text.match(sections.followUps) || [,''])[1];
+    result.followUps = followUpRaw ? followUpRaw.match(/[*\-]\s(.+)/g)?.map(x => x.replace(/^[-*]\s/, '').trim()) || [] : [];
+
+    return result;
+}
+ </script>
+</body>
+</html>
