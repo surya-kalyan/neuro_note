@@ -3,8 +3,11 @@ import whisper
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-# Load .env file from current directory
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+# Load .env file from current directory (if exists)
+try:
+    load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+except:
+    pass
 
 api_key=os.getenv('GEMINI_API_KEY')
 
